@@ -93,7 +93,7 @@ const AffiliateDashboard = () => {
       console.error(
         'Failed to fetch withdrawals:',
         error.response?.data?.message ||
-          error.message
+        error.message
       );
     }
   }, []);
@@ -111,10 +111,10 @@ const AffiliateDashboard = () => {
     setLoading(true);
 
     try {
-     // console.log('API REQUEST:', {
-        page: linksPagination.page,
-        limit: linksPagination.limit,
-      });
+      // console.log('API REQUEST:', {
+      //   page: linksPagination.page,
+      //   limit: linksPagination.limit,
+      // });
 
       const response = await api.get('/affiliate/dashboard', {
         params: {
@@ -130,7 +130,7 @@ const AffiliateDashboard = () => {
       }
 
      // console.log('API RESPONSE pagination:', data.linkPagination);
-    //  console.log('API RESPONSE links:', data.links);
+     // console.log('API RESPONSE links:', data.links);
 
       setAffiliate(data.affiliate || null);
       setStats(data.stats || null);
@@ -232,7 +232,7 @@ const AffiliateDashboard = () => {
   const handleLinkPageChange = (page) => {
     const newPage = Number(page);
 
-   // console.log('PAGE CHANGE:', newPage);
+    //console.log('PAGE CHANGE:', newPage);
 
     if (!Number.isInteger(newPage) || newPage < 1) {
       return;
@@ -256,7 +256,7 @@ const AffiliateDashboard = () => {
   const handleLinkLimitChange = (limit) => {
     const newLimit = Number(limit);
 
-  //  console.log('LIMIT CHANGE:', newLimit);
+   // console.log('LIMIT CHANGE:', newLimit);
 
     const allowedLimits = [5, 10, 20, 50, 100, 200];
 
@@ -540,23 +540,23 @@ const AffiliateDashboard = () => {
         {/* ================================================== */}
 
         {showHistory && (
-  <AffiliateReferrals
-    title="Withdrawal History"
-    type="withdrawal"
-    fetchUrl="/affiliate/withdrawals"
-    onClose={() => setShowHistory(false)}
-    availableStatuses={[
-      { value: '', label: 'All' },
-      { value: 'pending', label: 'Pending' },
-      { value: 'approved', label: 'Approved' },
-      { value: 'processing', label: 'Processing' },
-      { value: 'completed', label: 'Completed' },
-      { value: 'failed', label: 'Failed' },
-      { value: 'cancelled', label: 'Cancelled' },
-      { value: 'rejected', label: 'Rejected' },
-    ]}
-  />
-)}
+          <AffiliateReferrals
+            title="Withdrawal History"
+            type="withdrawal"
+            fetchUrl="/affiliate/withdrawals"
+            onClose={() => setShowHistory(false)}
+            availableStatuses={[
+              { value: '', label: 'All' },
+              { value: 'pending', label: 'Pending' },
+              { value: 'approved', label: 'Approved' },
+              { value: 'processing', label: 'Processing' },
+              { value: 'completed', label: 'Completed' },
+              { value: 'failed', label: 'Failed' },
+              { value: 'cancelled', label: 'Cancelled' },
+              { value: 'rejected', label: 'Rejected' },
+            ]}
+          />
+        )}
 
 
         {/* ================================================== */}
@@ -579,23 +579,23 @@ const AffiliateDashboard = () => {
         {/* RECENT REFERRALS */}
         {/* ================================================== */}
 
-       {/* ================================================== */}
-{/* REFERRALS (full paginated) */}
-{/* ================================================== */}
+        {/* ================================================== */}
+        {/* REFERRALS (full paginated) */}
+        {/* ================================================== */}
 
-<AffiliateReferrals
-  title="Referrals"
-  type="referral"
-  fetchUrl="/affiliate/referrals"
-  availableStatuses={[
-    { value: '', label: 'All' },
-    { value: 'subscribed', label: 'Subscribed' },
-    { value: 'registered', label: 'Registered' },
-    { value: 'pending', label: 'Pending' },
-    { value: 'approved', label: 'Approved' },
-   
-  ]}
-/>
+        <AffiliateReferrals
+          title="Referrals"
+          type="referral"
+          fetchUrl="/affiliate/referrals"
+          availableStatuses={[
+            { value: '', label: 'All' },
+            { value: 'subscribed', label: 'Subscribed' },
+            { value: 'registered', label: 'Registered' },
+            { value: 'pending', label: 'Pending' },
+            { value: 'approved', label: 'Approved' },
+
+          ]}
+        />
 
 
         {/* ================================================== */}
