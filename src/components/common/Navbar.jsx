@@ -66,8 +66,8 @@ const Navbar = ({ onToggleSidebar, isSidebarOpen }) => {
         top-0
         right-0
         left-0
-        lg:left-[230px]
-        z-40
+        lg:left-[220px]
+        z-30
         ${theme.colors.card}
         border-b
         ${theme.colors.border}
