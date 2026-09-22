@@ -4,8 +4,8 @@ import toast from 'react-hot-toast';
 
 // Get API URL from environment or use default
 //const API_URL = import.meta.env.VITE_API_URL_API || 'http://localhost:5000/api';
-//const API_URL = https://invoice-saas-with-email.onrender.com
-const API_URL = import.meta.env.VITE_API_URL_API || "https://invoicehub-fun-backend.onrender.com/api";
+const API_URL = 'https://invoicehub-fun-backend.onrender.com/api';
+//const API_URL = import.meta.env.VITE_API_URL_API || "https://invoicehub-fun-backend.onrender.com/api";
 // Create axios instance
 const api = axios.create({
   baseURL: API_URL,
