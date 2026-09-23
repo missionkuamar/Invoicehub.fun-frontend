@@ -3,7 +3,8 @@ import axios from 'axios';
 import { get, post, put, del } from './api';
 
 // Get API URL from environment
-const API_URL = import.meta.env.VITE_API_URL_API || 'http://localhost:5000/api';
+//const API_URL = import.meta.env.VITE_API_URL_API || 'http://localhost:5000/api';
+const API_URL =  'https://invoicehub-fun-backend.onrender.com/api';
 
 // Create a separate axios instance for withdrawal endpoints
 const withdrawalAxios = axios.create({
