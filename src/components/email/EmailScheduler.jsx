@@ -60,22 +60,22 @@ const EmailScheduler = ({ invoiceId, onEmailSent }) => {
 
   // ================= HANDLERS =================
   const handleSimpleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage(null);
+  e.preventDefault();
+  setLoading(true);
+  setMessage(null);
 
-    try {
-      // ============================================
+  try {
+    // ============================================
     // CONVERT LOCAL TIME → UTC
     // ============================================
 
     let finalScheduleTime;
 
-    if (formData.scheduleTime) {
-      const localDate = new Date(formData.scheduleTime);
+    if (simpleForm.scheduleTime) {
+      const localDate = new Date(simpleForm.scheduleTime);
 
       console.log('\n🕐 SELECTED LOCAL DATE:');
-      console.log('Raw:', formData.scheduleTime);
+      console.log('Raw:', simpleForm.scheduleTime);
       console.log('Date object:', localDate);
       console.log('Local:', localDate.toString());
       console.log('ISO UTC:', localDate.toISOString());
@@ -90,25 +90,70 @@ const EmailScheduler = ({ invoiceId, onEmailSent }) => {
     // ============================================
 
     const payload = {
-      ...formData,
+      ...simpleForm,
       scheduleTime: finalScheduleTime,
     };
 
+    console.log('\n📦 FINAL SIMPLE EMAIL PAYLOAD:');
+    console.log(payload);
 
-      await api.post('/emails/schedule', payload);
+    console.log(
+      '🕐 FINAL UTC scheduleTime:',
+      payload.scheduleTime
+    );
 
-      setMessage({ type: 'success', text: '✅ Email scheduled successfully!' });
-      setSimpleForm({ toEmail: '', subject: '', message: '', scheduleTime: '' });
-      if (onEmailSent) onEmailSent();
-      toast.success('Email scheduled successfully!');
-    } catch (error) {
-      const errorMsg = error.response?.data?.message || 'Failed to schedule email';
-      setMessage({ type: 'error', text: errorMsg });
-      toast.error(errorMsg);
-    } finally {
-      setLoading(false);
+    // ============================================
+    // SEND API
+    // ============================================
+
+    await api.post('/emails/schedule', payload);
+
+    // ============================================
+    // SUCCESS
+    // ============================================
+
+    setMessage({
+      type: 'success',
+      text: '✅ Email scheduled successfully!',
+    });
+
+    setSimpleForm({
+      toEmail: '',
+      subject: '',
+      message: '',
+      scheduleTime: '',
+    });
+
+    if (onEmailSent) {
+      onEmailSent();
     }
-  };
+
+    toast.success('Email scheduled successfully!');
+
+  } catch (error) {
+
+    console.error('\n❌ SIMPLE EMAIL SCHEDULING ERROR');
+    console.error('Error:', error);
+    console.error('Message:', error.message);
+    console.error('Response:', error.response);
+    console.error('Response data:', error.response?.data);
+    console.error('Response status:', error.response?.status);
+
+    const errorMsg =
+      error.response?.data?.message ||
+      'Failed to schedule email';
+
+    setMessage({
+      type: 'error',
+      text: errorMsg,
+    });
+
+    toast.error(errorMsg);
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleAdvancedSubmit = async (e) => {
     e.preventDefault();
