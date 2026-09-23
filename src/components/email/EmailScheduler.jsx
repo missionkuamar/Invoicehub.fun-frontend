@@ -155,7 +155,7 @@ const EmailScheduler = ({ invoiceId, onEmailSent }) => {
   }
 };
 
-  const handleAdvancedSubmit = async (e) => {
+const handleAdvancedSubmit = async (e) => {
   e.preventDefault();
   setLoading(true);
   setMessage(null);
@@ -176,8 +176,14 @@ const EmailScheduler = ({ invoiceId, onEmailSent }) => {
       console.log('Local:', localDate.toString());
       console.log('ISO UTC:', localDate.toISOString());
 
+      // Check invalid date
+      if (isNaN(localDate.getTime())) {
+        throw new Error('Invalid schedule time');
+      }
+
       finalScheduleTime = localDate.toISOString();
     } else {
+      // Send immediately
       finalScheduleTime = new Date().toISOString();
     }
 
@@ -191,7 +197,7 @@ const EmailScheduler = ({ invoiceId, onEmailSent }) => {
     };
 
     // ============================================
-    // ADD EMAIL TYPE SPECIFIC DATA
+    // EMAIL TYPE SPECIFIC DATA
     // ============================================
 
     switch (advancedForm.emailType) {
@@ -216,49 +222,108 @@ const EmailScheduler = ({ invoiceId, onEmailSent }) => {
         payload.cycle = advancedForm.cycle;
         break;
 
-      default:
+      case 'invoice':
+      case 'reminder':
+      case 'overdue':
+      case 'proforma':
+        // No additional data required
         break;
+
+      default:
+        throw new Error('Invalid email type');
     }
 
     // ============================================
-    // DEBUG FINAL PAYLOAD
+    // VALIDATE INVOICE
     // ============================================
 
-    console.log('\n📦 FINAL ADVANCED EMAIL PAYLOAD:');
-    console.log(payload);
+    if (!invoiceId) {
+      throw new Error('Please select an invoice first');
+    }
+
+    // ============================================
+    // DEBUG
+    // ============================================
+
+    console.log('\n========================================');
+    console.log('🚀 ADVANCED EMAIL SUBMIT');
+    console.log('========================================');
+
+    console.log('📌 Email Type:', advancedForm.emailType);
+    console.log('📌 Invoice ID:', invoiceId);
+    console.log('🕐 Original Schedule Time:', advancedForm.scheduleTime);
+    console.log('🕐 Final UTC Schedule Time:', finalScheduleTime);
+
+    console.log('\n📦 FINAL PAYLOAD:');
+    console.log(JSON.stringify(payload, null, 2));
 
     console.log(
-      '🕐 FINAL UTC scheduleTime:',
-      payload.scheduleTime
+      '🌍 Browser Timezone:',
+      Intl.DateTimeFormat().resolvedOptions().timeZone
     );
+
+    // ============================================
+    // GET ENDPOINT
+    // ============================================
+
+    const endpoint = advancedEndpoints[advancedForm.emailType];
+
+    if (!endpoint) {
+      throw new Error('Invalid email endpoint');
+    }
+
+    console.log('🌐 API Endpoint:', `/emails${endpoint}`);
 
     // ============================================
     // SEND API
     // ============================================
 
-    await api.post(
-      `/emails${advancedEndpoints[advancedForm.emailType]}`,
+    const response = await api.post(
+      `/emails${endpoint}`,
       payload
+    );
+
+    // ============================================
+    // RESPONSE DEBUG
+    // ============================================
+
+    console.log('\n========================================');
+    console.log('✅ ADVANCED EMAIL API RESPONSE');
+    console.log('========================================');
+
+    console.log('📥 Full Response:', response);
+    console.log('📥 Response Data:', response.data);
+    console.log('📧 Scheduled Email:', response.data?.data);
+    console.log(
+      '🕐 Saved Schedule Time:',
+      response.data?.data?.scheduleTime
     );
 
     // ============================================
     // SUCCESS
     // ============================================
 
-    const typeLabel = advancedForm.emailType.replace('_', ' ');
+    const typeLabel = advancedForm.emailType
+      .replace('_', ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
 
     setMessage({
       type: 'success',
-      text: `✅ ${typeLabel} email scheduled!`,
+      text: `✅ ${typeLabel} email scheduled successfully!`,
     });
 
+    // ============================================
+    // RESET FORM
+    // ============================================
+
     setAdvancedForm({
-      ...advancedForm,
+      emailType: advancedForm.emailType,
       scheduleTime: '',
       paymentDetails: '',
       reason: '',
       changes: '',
       creditAmount: '',
+      cycle: advancedForm.cycle,
     });
 
     if (onEmailSent) {
@@ -272,19 +337,23 @@ const EmailScheduler = ({ invoiceId, onEmailSent }) => {
   } catch (error) {
 
     // ============================================
-    // ERROR
+    // ERROR DEBUG
     // ============================================
 
-    console.error('\n❌ ADVANCED EMAIL SCHEDULING ERROR');
+    console.error('\n========================================');
+    console.error('❌ ADVANCED EMAIL ERROR');
+    console.error('========================================');
+
     console.error('Error:', error);
     console.error('Message:', error.message);
     console.error('Response:', error.response);
-    console.error('Response data:', error.response?.data);
-    console.error('Response status:', error.response?.status);
+    console.error('Response Data:', error.response?.data);
+    console.error('Status:', error.response?.status);
 
     const errorMsg =
       error.response?.data?.message ||
-      'Failed to schedule';
+      error.message ||
+      'Failed to schedule email';
 
     setMessage({
       type: 'error',
@@ -297,6 +366,7 @@ const EmailScheduler = ({ invoiceId, onEmailSent }) => {
     setLoading(false);
   }
 };
+
   return (
     <div className="space-y-3 sm:space-y-4 w-full">
 
