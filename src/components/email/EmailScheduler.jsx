@@ -74,11 +74,11 @@ const EmailScheduler = ({ invoiceId, onEmailSent }) => {
     if (simpleForm.scheduleTime) {
       const localDate = new Date(simpleForm.scheduleTime);
 
-      console.log('\n🕐 SELECTED LOCAL DATE:');
-      console.log('Raw:', simpleForm.scheduleTime);
-      console.log('Date object:', localDate);
-      console.log('Local:', localDate.toString());
-      console.log('ISO UTC:', localDate.toISOString());
+      // console.log('\n🕐 SELECTED LOCAL DATE:');
+      // console.log('Raw:', simpleForm.scheduleTime);
+      // console.log('Date object:', localDate);
+      // console.log('Local:', localDate.toString());
+      // console.log('ISO UTC:', localDate.toISOString());
 
       finalScheduleTime = localDate.toISOString();
     } else {
@@ -94,13 +94,13 @@ const EmailScheduler = ({ invoiceId, onEmailSent }) => {
       scheduleTime: finalScheduleTime,
     };
 
-    console.log('\n📦 FINAL SIMPLE EMAIL PAYLOAD:');
-    console.log(payload);
+    // console.log('\n📦 FINAL SIMPLE EMAIL PAYLOAD:');
+    // console.log(payload);
 
-    console.log(
-      '🕐 FINAL UTC scheduleTime:',
-      payload.scheduleTime
-    );
+    // console.log(
+    //   '🕐 FINAL UTC scheduleTime:',
+    //   payload.scheduleTime
+    // );
 
     // ============================================
     // SEND API
@@ -170,11 +170,11 @@ const handleAdvancedSubmit = async (e) => {
     if (advancedForm.scheduleTime) {
       const localDate = new Date(advancedForm.scheduleTime);
 
-      console.log('\n🕐 SELECTED LOCAL DATE:');
-      console.log('Raw:', advancedForm.scheduleTime);
-      console.log('Date object:', localDate);
-      console.log('Local:', localDate.toString());
-      console.log('ISO UTC:', localDate.toISOString());
+      // console.log('\n🕐 SELECTED LOCAL DATE:');
+      // console.log('Raw:', advancedForm.scheduleTime);
+      // console.log('Date object:', localDate);
+      // console.log('Local:', localDate.toString());
+      // console.log('ISO UTC:', localDate.toISOString());
 
       // Check invalid date
       if (isNaN(localDate.getTime())) {
@@ -245,22 +245,22 @@ const handleAdvancedSubmit = async (e) => {
     // DEBUG
     // ============================================
 
-    console.log('\n========================================');
-    console.log('🚀 ADVANCED EMAIL SUBMIT');
-    console.log('========================================');
+    // console.log('\n========================================');
+    // console.log('🚀 ADVANCED EMAIL SUBMIT');
+    // console.log('========================================');
 
-    console.log('📌 Email Type:', advancedForm.emailType);
-    console.log('📌 Invoice ID:', invoiceId);
-    console.log('🕐 Original Schedule Time:', advancedForm.scheduleTime);
-    console.log('🕐 Final UTC Schedule Time:', finalScheduleTime);
+    // console.log('📌 Email Type:', advancedForm.emailType);
+    // console.log('📌 Invoice ID:', invoiceId);
+    // console.log('🕐 Original Schedule Time:', advancedForm.scheduleTime);
+    // console.log('🕐 Final UTC Schedule Time:', finalScheduleTime);
 
-    console.log('\n📦 FINAL PAYLOAD:');
-    console.log(JSON.stringify(payload, null, 2));
+    // console.log('\n📦 FINAL PAYLOAD:');
+    // console.log(JSON.stringify(payload, null, 2));
 
-    console.log(
-      '🌍 Browser Timezone:',
-      Intl.DateTimeFormat().resolvedOptions().timeZone
-    );
+    // console.log(
+    //   '🌍 Browser Timezone:',
+    //   Intl.DateTimeFormat().resolvedOptions().timeZone
+    // );
 
     // ============================================
     // GET ENDPOINT
@@ -272,7 +272,7 @@ const handleAdvancedSubmit = async (e) => {
       throw new Error('Invalid email endpoint');
     }
 
-    console.log('🌐 API Endpoint:', `/emails${endpoint}`);
+    // console.log('🌐 API Endpoint:', `/emails${endpoint}`);
 
     // ============================================
     // SEND API
@@ -287,17 +287,17 @@ const handleAdvancedSubmit = async (e) => {
     // RESPONSE DEBUG
     // ============================================
 
-    console.log('\n========================================');
-    console.log('✅ ADVANCED EMAIL API RESPONSE');
-    console.log('========================================');
+    // console.log('\n========================================');
+    // console.log('✅ ADVANCED EMAIL API RESPONSE');
+    // console.log('========================================');
 
-    console.log('📥 Full Response:', response);
-    console.log('📥 Response Data:', response.data);
-    console.log('📧 Scheduled Email:', response.data?.data);
-    console.log(
-      '🕐 Saved Schedule Time:',
-      response.data?.data?.scheduleTime
-    );
+    // console.log('📥 Full Response:', response);
+    // console.log('📥 Response Data:', response.data);
+    // console.log('📧 Scheduled Email:', response.data?.data);
+    // console.log(
+    //   '🕐 Saved Schedule Time:',
+    //   response.data?.data?.scheduleTime
+    // );
 
     // ============================================
     // SUCCESS

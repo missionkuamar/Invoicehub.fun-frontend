@@ -141,15 +141,15 @@ const SimpleInvoiceForm = ({ type = 'standard' }) => {
  const handleSubmit = async (e) => {
   e.preventDefault();
 
-  console.group('🚀 INVOICE SUBMISSION START');
-  console.log('🕐 Time:', new Date().toISOString());
-  console.log('📋 Raw formData:', formData);
+  // console.group('🚀 INVOICE SUBMISSION START');
+  // console.log('🕐 Time:', new Date().toISOString());
+  // console.log('📋 Raw formData:', formData);
 
   // =========================
   // 1. BASIC VALIDATION
   // =========================
 
-  console.log('🔍 Starting validation...');
+  // console.log('🔍 Starting validation...');
 
   if (!formData.client.name) {
     console.error('❌ Validation failed: Client name missing');
@@ -158,17 +158,17 @@ const SimpleInvoiceForm = ({ type = 'standard' }) => {
     return;
   }
 
-  console.log('✅ Client name:', formData.client.name);
+  // console.log('✅ Client name:', formData.client.name);
 
   if (formData.items.some(item => !item.description)) {
-    console.error('❌ Validation failed: Item description missing');
-    console.log('📦 Items:', formData.items);
-    console.groupEnd();
+    // console.error('❌ Validation failed: Item description missing');
+    // console.log('📦 Items:', formData.items);
+    // console.groupEnd();
     toast.error('Please enter description for all items');
     return;
   }
 
-  console.log('✅ All item descriptions are valid');
+  // console.log('✅ All item descriptions are valid');
 
   const invalidCustomTax = formData.items.some(
     item =>
@@ -179,21 +179,21 @@ const SimpleInvoiceForm = ({ type = 'standard' }) => {
   if (invalidCustomTax) {
     console.error('❌ Validation failed: Invalid custom tax rate');
 
-    console.log(
-      '🧾 Invalid tax items:',
-      formData.items.filter(
-        item =>
-          item.isCustomTax &&
-          (!item.customTaxRate || Number(item.customTaxRate) <= 0)
-      )
-    );
+    // console.log(
+    //   '🧾 Invalid tax items:',
+    //   formData.items.filter(
+    //     item =>
+    //       item.isCustomTax &&
+    //       (!item.customTaxRate || Number(item.customTaxRate) <= 0)
+    //   )
+    // );
 
     console.groupEnd();
     toast.error('Please enter valid custom tax rate');
     return;
   }
 
-  console.log('✅ Custom tax validation passed');
+  // console.log('✅ Custom tax validation passed');
 
   // =========================
   // 2. SUBMIT START
@@ -201,18 +201,18 @@ const SimpleInvoiceForm = ({ type = 'standard' }) => {
 
   setIsSubmitting(true);
 
-  console.log('⏳ isSubmitting = true');
+  // console.log('⏳ isSubmitting = true');
 
   try {
     // =========================
     // 3. CALCULATE TOTALS
     // =========================
 
-    console.log('🧮 Calculating invoice totals...');
+    //console.log('🧮 Calculating invoice totals...');
 
     const totals = calculateTotals();
 
-    console.log('💰 Calculated totals:', totals);
+    // console.log('💰 Calculated totals:', totals);
 
     // =========================
     // 4. PREPARE INVOICE DATA
@@ -248,26 +248,26 @@ const SimpleInvoiceForm = ({ type = 'standard' }) => {
     // 5. LOG FINAL PAYLOAD
     // =========================
 
-    console.log('📤 FINAL invoiceData:');
-    console.log(JSON.stringify(invoiceData, null, 2));
+    // console.log('📤 FINAL invoiceData:');
+    // console.log(JSON.stringify(invoiceData, null, 2));
 
-    console.log('👤 Client:', invoiceData.client);
-    console.log('📦 Items:', invoiceData.items);
-    console.log('📅 Issue Date:', invoiceData.issueDate);
-    console.log('📅 Due Date:', invoiceData.dueDate);
-    console.log('💵 Subtotal:', invoiceData.subtotal);
-    console.log('🧾 Tax:', invoiceData.tax);
-    console.log('🎁 Discount:', invoiceData.discount);
-    console.log('🚚 Shipping:', invoiceData.shipping);
-    console.log('💰 TOTAL:', invoiceData.total);
-    console.log('📄 PO Number:', invoiceData.poNumber);
+    // console.log('👤 Client:', invoiceData.client);
+    // console.log('📦 Items:', invoiceData.items);
+    // console.log('📅 Issue Date:', invoiceData.issueDate);
+    // console.log('📅 Due Date:', invoiceData.dueDate);
+    // console.log('💵 Subtotal:', invoiceData.subtotal);
+    // console.log('🧾 Tax:', invoiceData.tax);
+    // console.log('🎁 Discount:', invoiceData.discount);
+    // console.log('🚚 Shipping:', invoiceData.shipping);
+    // console.log('💰 TOTAL:', invoiceData.total);
+    // console.log('📄 PO Number:', invoiceData.poNumber);
 
     // =========================
     // 6. REDUX API REQUEST
     // =========================
 
-    console.log('🚀 Dispatching createInvoice...');
-    console.time('⏱️ createInvoice API');
+    // console.log('🚀 Dispatching createInvoice...');
+    // console.time('⏱️ createInvoice API');
 
     const result = await dispatch(
       createInvoice(invoiceData)
@@ -279,8 +279,8 @@ const SimpleInvoiceForm = ({ type = 'standard' }) => {
     // 7. API SUCCESS RESPONSE
     // =========================
 
-    console.log('✅ Invoice created successfully!');
-    console.log('📥 Backend response:', result);
+    // console.log('✅ Invoice created successfully!');
+    // console.log('📥 Backend response:', result);
 
     // =========================
     // 8. SUCCESS
@@ -288,7 +288,7 @@ const SimpleInvoiceForm = ({ type = 'standard' }) => {
 
     toast.success('Invoice created successfully! 🎉');
 
-    console.log('➡️ Navigating to /invoices');
+    // console.log('➡️ Navigating to /invoices');
 
     navigate('/invoices');
 
@@ -298,13 +298,13 @@ const SimpleInvoiceForm = ({ type = 'standard' }) => {
     // 9. ERROR
     // =========================
 
-    console.error('❌ INVOICE CREATION FAILED');
+    // console.error('❌ INVOICE CREATION FAILED');
 
-    console.error('🔴 Error:', error);
-    console.error('🔴 Error message:', error?.message);
-    console.error('🔴 Error response:', error?.response);
-    console.error('🔴 Error data:', error?.response?.data);
-    console.error('🔴 Error status:', error?.response?.status);
+    // console.error('🔴 Error:', error);
+    // console.error('🔴 Error message:', error?.message);
+    // console.error('🔴 Error response:', error?.response);
+    // console.error('🔴 Error data:', error?.response?.data);
+    // console.error('🔴 Error status:', error?.response?.status);
 
     toast.error(
       error?.message || 'Failed to create invoice'
@@ -318,8 +318,8 @@ const SimpleInvoiceForm = ({ type = 'standard' }) => {
 
     setIsSubmitting(false);
 
-    console.log('🏁 isSubmitting = false');
-    console.log('🏁 INVOICE SUBMISSION END');
+    // console.log('🏁 isSubmitting = false');
+    // console.log('🏁 INVOICE SUBMISSION END');
     console.groupEnd();
   }
 };

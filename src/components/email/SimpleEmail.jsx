@@ -54,7 +54,7 @@ export default function SimpleEmail() {
       }
 
       const response = await api.get('/emails/my-emails', { params });
-console.log("response", response);
+// console.log("response", response);
       const data = response.data?.data || [];
       const pagination = response.data?.pagination || {};
 
@@ -99,9 +99,9 @@ console.log("response", response);
   const handleSchedule = async (e) => {
     e.preventDefault();
 
-    console.log('\n========================================');
-    console.log('📧 FRONTEND EMAIL SCHEDULING START');
-    console.log('========================================');
+    // console.log('\n========================================');
+    // console.log('📧 FRONTEND EMAIL SCHEDULING START');
+    // console.log('========================================');
 
     setLoading(true);
     setMessage(null);
