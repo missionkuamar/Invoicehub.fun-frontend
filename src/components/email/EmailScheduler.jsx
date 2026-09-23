@@ -65,10 +65,35 @@ const EmailScheduler = ({ invoiceId, onEmailSent }) => {
     setMessage(null);
 
     try {
-      const payload = {
-        ...simpleForm,
-        scheduleTime: simpleForm.scheduleTime || new Date().toISOString(),
-      };
+      // ============================================
+    // CONVERT LOCAL TIME → UTC
+    // ============================================
+
+    let finalScheduleTime;
+
+    if (formData.scheduleTime) {
+      const localDate = new Date(formData.scheduleTime);
+
+      console.log('\n🕐 SELECTED LOCAL DATE:');
+      console.log('Raw:', formData.scheduleTime);
+      console.log('Date object:', localDate);
+      console.log('Local:', localDate.toString());
+      console.log('ISO UTC:', localDate.toISOString());
+
+      finalScheduleTime = localDate.toISOString();
+    } else {
+      finalScheduleTime = new Date().toISOString();
+    }
+
+    // ============================================
+    // FINAL PAYLOAD
+    // ============================================
+
+    const payload = {
+      ...formData,
+      scheduleTime: finalScheduleTime,
+    };
+
 
       await api.post('/emails/schedule', payload);
 

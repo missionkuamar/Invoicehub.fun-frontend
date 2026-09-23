@@ -49,8 +49,8 @@ const Pricing = () => {
   {
     name: 'Business',
     price: {
-      monthly: 1999,
-      yearly: 11999,
+      monthly: 1199,
+      yearly: 1199,
     },
     features: [
       '1000 invoices/month',
