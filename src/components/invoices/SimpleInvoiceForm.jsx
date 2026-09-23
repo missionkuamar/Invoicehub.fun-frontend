@@ -138,48 +138,191 @@ const SimpleInvoiceForm = ({ type = 'standard' }) => {
     return { subtotal, totalTax, totalDiscount, total };
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.client.name) { toast.error('Please enter client name'); return; }
-    if (formData.items.some(item => !item.description)) { toast.error('Please enter description for all items'); return; }
-    const invalidCustomTax = formData.items.some(
-      item => item.isCustomTax && (!item.customTaxRate || Number(item.customTaxRate) <= 0)
-    );
-    if (invalidCustomTax) { toast.error('Please enter valid custom tax rate'); return; }
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    setIsSubmitting(true);
-    try {
-      const totals = calculateTotals();
-      const invoiceData = {
-        client: formData.client,
-        items: formData.items.map(item => ({
-          description: item.description,
-          quantity: Number(item.quantity) || 0,
-          rate: Number(item.rate) || 0,
-          amount: (Number(item.quantity) || 0) * (Number(item.rate) || 0),
-          taxRate: getEffectiveTaxRate(item),
-          discount: Number(item.discount) || 0,
-        })),
-        issueDate: formData.issueDate,
-        dueDate: formData.dueDate,
-        notes: formData.notes,
-        terms: formData.terms,
-        discount: Number(formData.discount) || 0,
-        shipping: Number(formData.shipping) || 0,
-        subtotal: totals.subtotal,
-        tax: totals.totalTax,
-        total: totals.total,
-        poNumber: formData.poNumber,
-      };
-      await dispatch(createInvoice(invoiceData)).unwrap();
-      toast.success('Invoice created successfully! 🎉');
-      navigate('/invoices');
-    } catch (error) {
-      toast.error(error.message || 'Failed to create invoice');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  console.group('🚀 INVOICE SUBMISSION START');
+  console.log('🕐 Time:', new Date().toISOString());
+  console.log('📋 Raw formData:', formData);
+
+  // =========================
+  // 1. BASIC VALIDATION
+  // =========================
+
+  console.log('🔍 Starting validation...');
+
+  if (!formData.client.name) {
+    console.error('❌ Validation failed: Client name missing');
+    console.groupEnd();
+    toast.error('Please enter client name');
+    return;
+  }
+
+  console.log('✅ Client name:', formData.client.name);
+
+  if (formData.items.some(item => !item.description)) {
+    console.error('❌ Validation failed: Item description missing');
+    console.log('📦 Items:', formData.items);
+    console.groupEnd();
+    toast.error('Please enter description for all items');
+    return;
+  }
+
+  console.log('✅ All item descriptions are valid');
+
+  const invalidCustomTax = formData.items.some(
+    item =>
+      item.isCustomTax &&
+      (!item.customTaxRate || Number(item.customTaxRate) <= 0)
+  );
+
+  if (invalidCustomTax) {
+    console.error('❌ Validation failed: Invalid custom tax rate');
+
+    console.log(
+      '🧾 Invalid tax items:',
+      formData.items.filter(
+        item =>
+          item.isCustomTax &&
+          (!item.customTaxRate || Number(item.customTaxRate) <= 0)
+      )
+    );
+
+    console.groupEnd();
+    toast.error('Please enter valid custom tax rate');
+    return;
+  }
+
+  console.log('✅ Custom tax validation passed');
+
+  // =========================
+  // 2. SUBMIT START
+  // =========================
+
+  setIsSubmitting(true);
+
+  console.log('⏳ isSubmitting = true');
+
+  try {
+    // =========================
+    // 3. CALCULATE TOTALS
+    // =========================
+
+    console.log('🧮 Calculating invoice totals...');
+
+    const totals = calculateTotals();
+
+    console.log('💰 Calculated totals:', totals);
+
+    // =========================
+    // 4. PREPARE INVOICE DATA
+    // =========================
+
+    const invoiceData = {
+      client: formData.client,
+
+      items: formData.items.map(item => ({
+        description: item.description,
+        quantity: Number(item.quantity) || 0,
+        rate: Number(item.rate) || 0,
+        amount:
+          (Number(item.quantity) || 0) *
+          (Number(item.rate) || 0),
+        taxRate: getEffectiveTaxRate(item),
+        discount: Number(item.discount) || 0,
+      })),
+
+      issueDate: formData.issueDate,
+      dueDate: formData.dueDate,
+      notes: formData.notes,
+      terms: formData.terms,
+      discount: Number(formData.discount) || 0,
+      shipping: Number(formData.shipping) || 0,
+      subtotal: totals.subtotal,
+      tax: totals.totalTax,
+      total: totals.total,
+      poNumber: formData.poNumber,
+    };
+
+    // =========================
+    // 5. LOG FINAL PAYLOAD
+    // =========================
+
+    console.log('📤 FINAL invoiceData:');
+    console.log(JSON.stringify(invoiceData, null, 2));
+
+    console.log('👤 Client:', invoiceData.client);
+    console.log('📦 Items:', invoiceData.items);
+    console.log('📅 Issue Date:', invoiceData.issueDate);
+    console.log('📅 Due Date:', invoiceData.dueDate);
+    console.log('💵 Subtotal:', invoiceData.subtotal);
+    console.log('🧾 Tax:', invoiceData.tax);
+    console.log('🎁 Discount:', invoiceData.discount);
+    console.log('🚚 Shipping:', invoiceData.shipping);
+    console.log('💰 TOTAL:', invoiceData.total);
+    console.log('📄 PO Number:', invoiceData.poNumber);
+
+    // =========================
+    // 6. REDUX API REQUEST
+    // =========================
+
+    console.log('🚀 Dispatching createInvoice...');
+    console.time('⏱️ createInvoice API');
+
+    const result = await dispatch(
+      createInvoice(invoiceData)
+    ).unwrap();
+
+    console.timeEnd('⏱️ createInvoice API');
+
+    // =========================
+    // 7. API SUCCESS RESPONSE
+    // =========================
+
+    console.log('✅ Invoice created successfully!');
+    console.log('📥 Backend response:', result);
+
+    // =========================
+    // 8. SUCCESS
+    // =========================
+
+    toast.success('Invoice created successfully! 🎉');
+
+    console.log('➡️ Navigating to /invoices');
+
+    navigate('/invoices');
+
+  } catch (error) {
+
+    // =========================
+    // 9. ERROR
+    // =========================
+
+    console.error('❌ INVOICE CREATION FAILED');
+
+    console.error('🔴 Error:', error);
+    console.error('🔴 Error message:', error?.message);
+    console.error('🔴 Error response:', error?.response);
+    console.error('🔴 Error data:', error?.response?.data);
+    console.error('🔴 Error status:', error?.response?.status);
+
+    toast.error(
+      error?.message || 'Failed to create invoice'
+    );
+
+  } finally {
+
+    // =========================
+    // 10. FINISH
+    // =========================
+
+    setIsSubmitting(false);
+
+    console.log('🏁 isSubmitting = false');
+    console.log('🏁 INVOICE SUBMISSION END');
+    console.groupEnd();
+  }
+};
 
   const totals = calculateTotals();
   const inputClass = `w-full px-3 py-2 md:px-4 md:py-2.5 rounded-xl border ${theme.colors.border} ${theme.colors.text} bg-transparent focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm md:text-base`;

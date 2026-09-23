@@ -48,30 +48,229 @@ export default function SimpleEmail() {
 
   // ✅ Schedule email
   const handleSchedule = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage(null);
+  e.preventDefault();
 
-    try {
-      const payload = {
-        ...formData,
-        scheduleTime: formData.scheduleTime || new Date().toISOString(),
-      };
+  console.log('\n========================================');
+  console.log('📧 FRONTEND EMAIL SCHEDULING START');
+  console.log('========================================');
 
-      await api.post('/emails/schedule', payload);
+  console.log('📝 Original formData:', formData);
+  console.log('🕐 Original scheduleTime:', formData.scheduleTime);
 
-      setMessage({ type: 'success', text: '✅ Email scheduled successfully!' });
-      toast.success('Email scheduled successfully!');
-      setFormData({ toEmail: '', subject: '', message: '', scheduleTime: '' });
-      fetchEmails();
-    } catch (error) {
-      const errorMsg = error.response?.data?.message || 'Failed to schedule email';
-      setMessage({ type: 'error', text: errorMsg });
-      toast.error(errorMsg);
-    } finally {
-      setLoading(false);
+  console.log('🕐 Browser current Date:', new Date());
+
+  console.log(
+    '🌍 Browser timezone:',
+    Intl.DateTimeFormat().resolvedOptions().timeZone
+  );
+
+  console.log(
+    '🌍 Browser timezone offset:',
+    new Date().getTimezoneOffset()
+  );
+
+  setLoading(true);
+  setMessage(null);
+
+  try {
+    // ============================================
+    // CONVERT LOCAL TIME → UTC
+    // ============================================
+
+    let finalScheduleTime;
+
+    if (formData.scheduleTime) {
+      const localDate = new Date(formData.scheduleTime);
+
+      console.log('\n🕐 SELECTED LOCAL DATE:');
+      console.log('Raw:', formData.scheduleTime);
+      console.log('Date object:', localDate);
+      console.log('Local:', localDate.toString());
+      console.log('ISO UTC:', localDate.toISOString());
+
+      finalScheduleTime = localDate.toISOString();
+    } else {
+      finalScheduleTime = new Date().toISOString();
     }
-  };
+
+    // ============================================
+    // FINAL PAYLOAD
+    // ============================================
+
+    const payload = {
+      ...formData,
+      scheduleTime: finalScheduleTime,
+    };
+
+    console.log('\n📦 FINAL PAYLOAD TO BACKEND:');
+    console.log(payload);
+
+    console.log('\n📦 FINAL PAYLOAD JSON:');
+    console.log(JSON.stringify(payload, null, 2));
+
+    console.log(
+      '🕐 FINAL UTC scheduleTime:',
+      payload.scheduleTime
+    );
+
+    // ============================================
+    // DEBUG FINAL DATE
+    // ============================================
+
+    const debugDate = new Date(payload.scheduleTime);
+
+    console.log('\n🔍 FINAL DATE DEBUG:');
+
+    console.log(
+      'ISO UTC:',
+      debugDate.toISOString()
+    );
+
+    console.log(
+      'Local:',
+      debugDate.toString()
+    );
+
+    console.log(
+      'Locale:',
+      debugDate.toLocaleString()
+    );
+
+    console.log(
+      'Timezone:',
+      Intl.DateTimeFormat().resolvedOptions().timeZone
+    );
+
+    // ============================================
+    // SEND API
+    // ============================================
+
+    console.log('\n🚀 Sending POST /emails/schedule...');
+
+    const response = await api.post(
+      '/emails/schedule',
+      payload
+    );
+
+    // ============================================
+    // RESPONSE
+    // ============================================
+
+    console.log('\n========================================');
+    console.log('✅ FRONTEND API RESPONSE');
+    console.log('========================================');
+
+    console.log('📥 Full Response:', response);
+
+    console.log(
+      '📥 Response data:',
+      response.data
+    );
+
+    console.log(
+      '📥 Scheduled email:',
+      response.data?.data
+    );
+
+    console.log(
+      '📥 Saved scheduleTime:',
+      response.data?.data?.scheduleTime
+    );
+
+    if (response.data?.data?.scheduleTime) {
+      const responseDate = new Date(
+        response.data.data.scheduleTime
+      );
+
+      console.log('\n🔍 RESPONSE DATE DEBUG:');
+
+      console.log(
+        'ISO UTC:',
+        responseDate.toISOString()
+      );
+
+      console.log(
+        'Local:',
+        responseDate.toString()
+      );
+
+      console.log(
+        'Locale:',
+        responseDate.toLocaleString()
+      );
+    }
+
+    console.log(
+      '📊 Email stats:',
+      response.data?.emailStats
+    );
+
+    // ============================================
+    // SUCCESS
+    // ============================================
+
+    setMessage({
+      type: 'success',
+      text: '✅ Email scheduled successfully!',
+    });
+
+    toast.success(
+      'Email scheduled successfully!'
+    );
+
+    setFormData({
+      toEmail: '',
+      subject: '',
+      message: '',
+      scheduleTime: '',
+    });
+
+    fetchEmails();
+
+  } catch (error) {
+
+    console.error('\n========================================');
+    console.error('❌ FRONTEND EMAIL SCHEDULING ERROR');
+    console.error('========================================');
+
+    console.error('Error:', error);
+    console.error('Message:', error.message);
+
+    console.error(
+      'Response:',
+      error.response
+    );
+
+    console.error(
+      'Response data:',
+      error.response?.data
+    );
+
+    console.error(
+      'Response status:',
+      error.response?.status
+    );
+
+    const errorMsg =
+      error.response?.data?.message ||
+      'Failed to schedule email';
+
+    setMessage({
+      type: 'error',
+      text: errorMsg,
+    });
+
+    toast.error(errorMsg);
+
+  } finally {
+
+    setLoading(false);
+
+    console.log('\n========================================');
+    console.log('📧 FRONTEND EMAIL SCHEDULING END');
+    console.log('========================================');
+  }
+};
 
   // ✅ Delete email
   const handleDelete = async (id) => {
@@ -145,11 +344,10 @@ export default function SimpleEmail() {
         {/* ============================================================ */}
         {message && (
           <div
-            className={`p-3 sm:p-4 rounded-xl flex items-start gap-3 text-xs sm:text-sm border ${
-              message.type === 'success'
+            className={`p-3 sm:p-4 rounded-xl flex items-start gap-3 text-xs sm:text-sm border ${message.type === 'success'
                 ? 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30'
                 : 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/30'
-            }`}
+              }`}
           >
             {message.type === 'success' ? (
               <FaCheckCircle className="mt-0.5 flex-shrink-0" />
