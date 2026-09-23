@@ -1,11 +1,12 @@
 // frontend/src/pages/SimpleEmail.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   FaEnvelope, FaPaperPlane, FaSpinner, FaTrash,
   FaCheckCircle, FaExclamationCircle, FaClock,
   FaUser, FaCalendarAlt,
+  FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight,
 } from 'react-icons/fa';
 import api from '../../services/api';
 
@@ -24,20 +25,45 @@ export default function SimpleEmail() {
   });
   const [message, setMessage] = useState(null);
 
+  // ============================================================
+  // PAGINATION + FILTER STATE
+  // ============================================================
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(5);         // 5 / 10 / 20
+  const [statusFilter, setStatusFilter] = useState(''); // '', 'pending', 'sent', 'failed'
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { user } = useSelector((state) => state.auth || {});
 
-  // ✅ Fetch emails on mount
-  useEffect(() => {
-    fetchEmails();
-  }, []);
-
+  // ============================================================
+  // FETCH EMAILS (with pagination + filter)
+  // ============================================================
   const fetchEmails = async () => {
     setFetching(true);
     try {
-      const response = await api.get('/emails/my-emails');
-      setEmails(response.data.data || []);
+      const params = {
+        page,
+        limit,
+      };
+
+      if (statusFilter) {
+        params.status = statusFilter;
+      }
+
+      const response = await api.get('/emails/my-emails', { params });
+console.log("response", response);
+      const data = response.data?.data || [];
+      const pagination = response.data?.pagination || {};
+
+      setEmails(data);
+
+      // Sync pagination info from backend
+      if (pagination.totalPages) setTotalPages(pagination.totalPages);
+      if (typeof pagination.total === 'number') setTotalCount(pagination.total);
+
     } catch (error) {
       console.error('Error fetching emails:', error);
       toast.error('Failed to load emails');
@@ -46,246 +72,117 @@ export default function SimpleEmail() {
     }
   };
 
-  // ✅ Schedule email
-  const handleSchedule = async (e) => {
-  e.preventDefault();
-
-  console.log('\n========================================');
-  console.log('📧 FRONTEND EMAIL SCHEDULING START');
-  console.log('========================================');
-
-  console.log('📝 Original formData:', formData);
-  console.log('🕐 Original scheduleTime:', formData.scheduleTime);
-
-  console.log('🕐 Browser current Date:', new Date());
-
-  console.log(
-    '🌍 Browser timezone:',
-    Intl.DateTimeFormat().resolvedOptions().timeZone
-  );
-
-  console.log(
-    '🌍 Browser timezone offset:',
-    new Date().getTimezoneOffset()
-  );
-
-  setLoading(true);
-  setMessage(null);
-
-  try {
-    // ============================================
-    // CONVERT LOCAL TIME → UTC
-    // ============================================
-
-    let finalScheduleTime;
-
-    if (formData.scheduleTime) {
-      const localDate = new Date(formData.scheduleTime);
-
-      console.log('\n🕐 SELECTED LOCAL DATE:');
-      console.log('Raw:', formData.scheduleTime);
-      console.log('Date object:', localDate);
-      console.log('Local:', localDate.toString());
-      console.log('ISO UTC:', localDate.toISOString());
-
-      finalScheduleTime = localDate.toISOString();
-    } else {
-      finalScheduleTime = new Date().toISOString();
-    }
-
-    // ============================================
-    // FINAL PAYLOAD
-    // ============================================
-
-    const payload = {
-      ...formData,
-      scheduleTime: finalScheduleTime,
-    };
-
-    console.log('\n📦 FINAL PAYLOAD TO BACKEND:');
-    console.log(payload);
-
-    console.log('\n📦 FINAL PAYLOAD JSON:');
-    console.log(JSON.stringify(payload, null, 2));
-
-    console.log(
-      '🕐 FINAL UTC scheduleTime:',
-      payload.scheduleTime
-    );
-
-    // ============================================
-    // DEBUG FINAL DATE
-    // ============================================
-
-    const debugDate = new Date(payload.scheduleTime);
-
-    console.log('\n🔍 FINAL DATE DEBUG:');
-
-    console.log(
-      'ISO UTC:',
-      debugDate.toISOString()
-    );
-
-    console.log(
-      'Local:',
-      debugDate.toString()
-    );
-
-    console.log(
-      'Locale:',
-      debugDate.toLocaleString()
-    );
-
-    console.log(
-      'Timezone:',
-      Intl.DateTimeFormat().resolvedOptions().timeZone
-    );
-
-    // ============================================
-    // SEND API
-    // ============================================
-
-    console.log('\n🚀 Sending POST /emails/schedule...');
-
-    const response = await api.post(
-      '/emails/schedule',
-      payload
-    );
-
-    // ============================================
-    // RESPONSE
-    // ============================================
-
-    console.log('\n========================================');
-    console.log('✅ FRONTEND API RESPONSE');
-    console.log('========================================');
-
-    console.log('📥 Full Response:', response);
-
-    console.log(
-      '📥 Response data:',
-      response.data
-    );
-
-    console.log(
-      '📥 Scheduled email:',
-      response.data?.data
-    );
-
-    console.log(
-      '📥 Saved scheduleTime:',
-      response.data?.data?.scheduleTime
-    );
-
-    if (response.data?.data?.scheduleTime) {
-      const responseDate = new Date(
-        response.data.data.scheduleTime
-      );
-
-      console.log('\n🔍 RESPONSE DATE DEBUG:');
-
-      console.log(
-        'ISO UTC:',
-        responseDate.toISOString()
-      );
-
-      console.log(
-        'Local:',
-        responseDate.toString()
-      );
-
-      console.log(
-        'Locale:',
-        responseDate.toLocaleString()
-      );
-    }
-
-    console.log(
-      '📊 Email stats:',
-      response.data?.emailStats
-    );
-
-    // ============================================
-    // SUCCESS
-    // ============================================
-
-    setMessage({
-      type: 'success',
-      text: '✅ Email scheduled successfully!',
-    });
-
-    toast.success(
-      'Email scheduled successfully!'
-    );
-
-    setFormData({
-      toEmail: '',
-      subject: '',
-      message: '',
-      scheduleTime: '',
-    });
-
+  // ============================================================
+  // REFETCH WHEN page / limit / statusFilter CHANGES
+  // ============================================================
+  useEffect(() => {
     fetchEmails();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, limit, statusFilter]);
 
-  } catch (error) {
+  // ============================================================
+  // RESET TO PAGE 1 WHEN FILTER CHANGES
+  // ============================================================
+  const handleStatusChange = (newStatus) => {
+    setStatusFilter(newStatus);
+    setPage(1);
+  };
 
-    console.error('\n========================================');
-    console.error('❌ FRONTEND EMAIL SCHEDULING ERROR');
-    console.error('========================================');
+  const handleLimitChange = (newLimit) => {
+    setLimit(Number(newLimit));
+    setPage(1);
+  };
 
-    console.error('Error:', error);
-    console.error('Message:', error.message);
-
-    console.error(
-      'Response:',
-      error.response
-    );
-
-    console.error(
-      'Response data:',
-      error.response?.data
-    );
-
-    console.error(
-      'Response status:',
-      error.response?.status
-    );
-
-    const errorMsg =
-      error.response?.data?.message ||
-      'Failed to schedule email';
-
-    setMessage({
-      type: 'error',
-      text: errorMsg,
-    });
-
-    toast.error(errorMsg);
-
-  } finally {
-
-    setLoading(false);
+  // ============================================================
+  // SCHEDULE EMAIL
+  // ============================================================
+  const handleSchedule = async (e) => {
+    e.preventDefault();
 
     console.log('\n========================================');
-    console.log('📧 FRONTEND EMAIL SCHEDULING END');
+    console.log('📧 FRONTEND EMAIL SCHEDULING START');
     console.log('========================================');
-  }
-};
 
-  // ✅ Delete email
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      let finalScheduleTime;
+
+      if (formData.scheduleTime) {
+        const localDate = new Date(formData.scheduleTime);
+        finalScheduleTime = localDate.toISOString();
+      } else {
+        finalScheduleTime = new Date().toISOString();
+      }
+
+      const payload = {
+        ...formData,
+        scheduleTime: finalScheduleTime,
+      };
+
+      const response = await api.post('/emails/schedule', payload);
+
+      setMessage({
+        type: 'success',
+        text: '✅ Email scheduled successfully!',
+      });
+
+      toast.success('Email scheduled successfully!');
+
+      setFormData({
+        toEmail: '',
+        subject: '',
+        message: '',
+        scheduleTime: '',
+      });
+
+      // Reset to first page + refresh
+      setPage(1);
+      fetchEmails();
+
+    } catch (error) {
+      console.error('❌ FRONTEND EMAIL SCHEDULING ERROR:', error);
+
+      const errorMsg =
+        error.response?.data?.message ||
+        'Failed to schedule email';
+
+      setMessage({
+        type: 'error',
+        text: errorMsg,
+      });
+
+      toast.error(errorMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ============================================================
+  // DELETE EMAIL
+  // ============================================================
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this scheduled email?')) return;
 
     try {
       await api.delete(`/emails/${id}`);
-      setEmails((prev) => prev.filter((email) => email._id !== id));
       toast.success('Email deleted successfully!');
+
+      // If this was the last item on the page, go back a page
+      if (emails.length === 1 && page > 1) {
+        setPage((p) => p - 1);
+      } else {
+        fetchEmails();
+      }
     } catch (error) {
       toast.error('Failed to delete email');
     }
   };
 
-  // ✅ Status color helper
+  // ============================================================
+  // STATUS COLOR HELPER
+  // ============================================================
   const getStatusColor = (status) => {
     const colors = {
       pending: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
@@ -295,10 +192,25 @@ export default function SimpleEmail() {
     return colors[status] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
   };
 
-  // ✅ Common classes
+  // ============================================================
+  // FILTER TABS CONFIG
+  // ============================================================
+  const filterTabs = [
+    { key: '', label: 'All' },
+    { key: 'pending', label: 'Pending' },
+    { key: 'sent', label: 'Sent' },
+    { key: 'failed', label: 'Failed' },
+  ];
+
+  // ============================================================
+  // COMMON CLASSES
+  // ============================================================
   const inputClass = `w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border ${theme.colors.border} ${theme.colors.text} bg-transparent focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm transition-colors`;
   const labelClass = `block text-xs sm:text-sm font-medium ${theme.colors.text} opacity-80 mb-1`;
 
+  // ============================================================
+  // RENDER
+  // ============================================================
   return (
     <div className={`min-h-screen ${theme.colors.background} w-full overflow-x-hidden`}>
       <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
@@ -345,8 +257,8 @@ export default function SimpleEmail() {
         {message && (
           <div
             className={`p-3 sm:p-4 rounded-xl flex items-start gap-3 text-xs sm:text-sm border ${message.type === 'success'
-                ? 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30'
-                : 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/30'
+              ? 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30'
+              : 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/30'
               }`}
           >
             {message.type === 'success' ? (
@@ -445,39 +357,60 @@ export default function SimpleEmail() {
           {/* SCHEDULED EMAILS LIST */}
           {/* ============================================================ */}
           <div className={`${theme.colors.card} p-4 sm:p-5 md:p-6 rounded-2xl border ${theme.colors.border} shadow-sm flex flex-col`}>
-            <div className="flex items-center justify-between gap-2 mb-4">
+
+            {/* ---------- Header + Count ---------- */}
+            <div className="flex items-center justify-between gap-2 mb-3">
               <h2 className={`text-base sm:text-lg md:text-xl font-semibold ${theme.colors.text} flex items-center gap-2`}>
                 <FaClock className={theme.colors.primary} size={16} />
                 Scheduled Emails
               </h2>
               <span className={`text-xs sm:text-sm ${theme.colors.text} opacity-60 px-2 py-1 rounded-full ${theme.colors.background}`}>
-                {emails.length}
+                {totalCount || emails.length}
               </span>
             </div>
 
-            {/* Empty State */}
+            {/* ---------- STATUS FILTER TABS ---------- */}
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-4">
+              {filterTabs.map((tab) => {
+                const active = statusFilter === tab.key;
+                return (
+                  <button
+                    key={tab.key || 'all'}
+                    onClick={() => handleStatusChange(tab.key)}
+                    className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-medium transition-all border ${active
+                      ? `${theme.colors.button} text-white border-transparent`
+                      : `${theme.colors.text} ${theme.colors.border} opacity-70 hover:opacity-100`
+                      }`}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* ---------- Empty State ---------- */}
             {emails.length === 0 && !fetching && (
               <div className={`flex-1 flex flex-col items-center justify-center text-center py-12 px-4`}>
                 <div className={`text-4xl sm:text-5xl mb-4 ${theme.colors.text} opacity-20`}>
                   <FaEnvelope className="mx-auto" />
                 </div>
                 <p className={`text-sm sm:text-base font-medium ${theme.colors.text}`}>
-                  No emails scheduled
+                  No emails {statusFilter ? `with status "${statusFilter}"` : 'scheduled'}
                 </p>
                 <p className={`text-xs sm:text-sm ${theme.colors.text} opacity-60 mt-1`}>
-                  Schedule your first email to get started
+                  {statusFilter ? 'Try a different filter' : 'Schedule your first email to get started'}
                 </p>
               </div>
             )}
 
-            {/* Loading State */}
+            {/* ---------- Loading State ---------- */}
             {fetching && emails.length === 0 && (
               <div className="flex-1 flex items-center justify-center py-12">
                 <FaSpinner className={`animate-spin text-3xl sm:text-4xl ${theme.colors.primary}`} />
               </div>
             )}
 
-            {/* Email List */}
+            {/* ---------- Email List ---------- */}
             {emails.length > 0 && (
               <div className="flex-1 space-y-3 max-h-[500px] lg:max-h-[600px] overflow-y-auto pr-1">
                 {emails.map((email) => (
@@ -487,18 +420,15 @@ export default function SimpleEmail() {
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
-                        {/* Subject */}
                         <h3 className={`font-semibold text-sm sm:text-base ${theme.colors.text} truncate`}>
                           {email.subject || 'No subject'}
                         </h3>
 
-                        {/* To Email */}
                         <p className={`text-xs sm:text-sm ${theme.colors.text} opacity-70 truncate mt-1 flex items-center gap-1.5`}>
                           <FaEnvelope size={10} className="flex-shrink-0" />
                           {email.toEmail}
                         </p>
 
-                        {/* Schedule Time */}
                         <p className={`text-xs sm:text-sm ${theme.colors.text} opacity-70 flex items-center gap-1.5 mt-0.5`}>
                           <FaCalendarAlt size={10} className="flex-shrink-0" />
                           {new Date(email.scheduleTime).toLocaleString('en-IN', {
@@ -509,7 +439,6 @@ export default function SimpleEmail() {
                           })}
                         </p>
 
-                        {/* Status Badge */}
                         <span
                           className={`inline-block px-2 py-0.5 text-[10px] sm:text-xs font-semibold rounded-full mt-2 ${getStatusColor(
                             email.status
@@ -519,7 +448,6 @@ export default function SimpleEmail() {
                         </span>
                       </div>
 
-                      {/* Delete Button (only for pending) */}
                       {email.status === 'pending' && (
                         <button
                           onClick={() => handleDelete(email._id)}
@@ -535,6 +463,82 @@ export default function SimpleEmail() {
                 ))}
               </div>
             )}
+
+            {/* ============================================================ */}
+            {/* PAGINATION — only visible from md and up */}
+            {/* ============================================================ */}
+            {totalCount > 0 && (
+              <div className="hidden md:flex items-center justify-between gap-3 mt-4 pt-4 border-t flex-wrap"
+                style={{ borderColor: 'rgba(128,128,128,0.2)' }}
+              >
+
+                {/* -------- Left: Page size selector -------- */}
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs ${theme.colors.text} opacity-70`}>
+                    Rows:
+                  </span>
+                  <select
+                    value={limit}
+                    onChange={(e) => handleLimitChange(e.target.value)}
+                    className={`text-xs px-2 py-1 rounded-lg border ${theme.colors.border} ${theme.colors.text} bg-transparent focus:outline-none`}
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                  </select>
+                </div>
+
+                {/* -------- Right: Page navigation -------- */}
+                <div className="flex items-center gap-1">
+
+                  {/* First */}
+                  <button
+                    onClick={() => setPage(1)}
+                    disabled={page === 1 || fetching}
+                    className={`p-1.5 rounded-lg border ${theme.colors.border} ${theme.colors.text} hover:opacity-100 opacity-70 disabled:opacity-30 disabled:cursor-not-allowed transition-opacity`}
+                    title="First page"
+                  >
+                    <FaAngleDoubleLeft size={12} />
+                  </button>
+
+                  {/* Prev */}
+                  <button
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1 || fetching}
+                    className={`p-1.5 rounded-lg border ${theme.colors.border} ${theme.colors.text} hover:opacity-100 opacity-70 disabled:opacity-30 disabled:cursor-not-allowed transition-opacity`}
+                    title="Previous page"
+                  >
+                    <FaChevronLeft size={12} />
+                  </button>
+
+                  {/* Page info */}
+                  <span className={`text-xs ${theme.colors.text} opacity-80 px-2 whitespace-nowrap`}>
+                    {page} / {totalPages || 1}
+                  </span>
+
+                  {/* Next */}
+                  <button
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages || fetching}
+                    className={`p-1.5 rounded-lg border ${theme.colors.border} ${theme.colors.text} hover:opacity-100 opacity-70 disabled:opacity-30 disabled:cursor-not-allowed transition-opacity`}
+                    title="Next page"
+                  >
+                    <FaChevronRight size={12} />
+                  </button>
+
+                  {/* Last */}
+                  <button
+                    onClick={() => setPage(totalPages)}
+                    disabled={page >= totalPages || fetching}
+                    className={`p-1.5 rounded-lg border ${theme.colors.border} ${theme.colors.text} hover:opacity-100 opacity-70 disabled:opacity-30 disabled:cursor-not-allowed transition-opacity`}
+                    title="Last page"
+                  >
+                    <FaAngleDoubleRight size={12} />
+                  </button>
+                </div>
+              </div>
+            )}
+
           </div>
         </div>
       </div>
