@@ -417,7 +417,7 @@ const AffiliateDashboard = () => {
     try {
       const backendUrl =
         import.meta.env.VITE_API_URL ||
-        'http://localhost:5000';
+        'https://invoicehub-fun-backend.onrender.com';
 
       const url = `${backendUrl}/r/${slug}?ref=${code}`;
 

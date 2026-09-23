@@ -52,8 +52,10 @@ import RefundPolicy from './components/homepage/contact/RefundPolicy';
 // ✅ Affiliate Redirect Component
 const AffiliateRedirect = () => {
   const { slug } = useParams();
+
   useEffect(() => {
-    window.location.href = `https://invoicehub-fun-backend.onrender.com/r/${slug}${window.location.search}`;
+    window.location.href = `http://localhost:5000/r/${slug}${window.location.search}`;
+    //window.location.href = `https://invoicehub-fun-backend.onrender.com/r/${slug}${window.location.search}`;
   }, [slug]);
   return (
     <div className="flex justify-center items-center h-64">

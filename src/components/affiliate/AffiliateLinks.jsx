@@ -207,6 +207,7 @@ const AffiliateLinks = ({
 
   const handleCopy = (link) => {
 
+    console.log("link", link.slug);
     if (!link?.slug) {
       return;
     }
