@@ -156,60 +156,147 @@ const EmailScheduler = ({ invoiceId, onEmailSent }) => {
 };
 
   const handleAdvancedSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage(null);
+  e.preventDefault();
+  setLoading(true);
+  setMessage(null);
 
-    try {
-      const payload = {
-        invoiceId,
-        scheduleTime: advancedForm.scheduleTime || new Date().toISOString(),
-      };
+  try {
+    // ============================================
+    // CONVERT LOCAL TIME → UTC
+    // ============================================
 
-      switch (advancedForm.emailType) {
-        case 'confirmation':
-          payload.paymentDetails = advancedForm.paymentDetails;
-          break;
-        case 'cancellation':
-          payload.reason = advancedForm.reason;
-          break;
-        case 'revised':
-          payload.changes = advancedForm.changes;
-          break;
-        case 'credit_note':
-          payload.creditAmount = advancedForm.creditAmount;
-          payload.reason = advancedForm.reason;
-          break;
-        case 'recurring':
-          payload.cycle = advancedForm.cycle;
-          break;
-        default:
-          break;
-      }
+    let finalScheduleTime;
 
-      await api.post(`/emails${advancedEndpoints[advancedForm.emailType]}`, payload);
+    if (advancedForm.scheduleTime) {
+      const localDate = new Date(advancedForm.scheduleTime);
 
-      const typeLabel = advancedForm.emailType.replace('_', ' ');
-      setMessage({ type: 'success', text: `✅ ${typeLabel} email scheduled!` });
-      setAdvancedForm({
-        ...advancedForm,
-        scheduleTime: '',
-        paymentDetails: '',
-        reason: '',
-        changes: '',
-        creditAmount: '',
-      });
-      if (onEmailSent) onEmailSent();
-      toast.success(`${typeLabel} email scheduled successfully!`);
-    } catch (error) {
-      const errorMsg = error.response?.data?.message || 'Failed to schedule';
-      setMessage({ type: 'error', text: errorMsg });
-      toast.error(errorMsg);
-    } finally {
-      setLoading(false);
+      console.log('\n🕐 SELECTED LOCAL DATE:');
+      console.log('Raw:', advancedForm.scheduleTime);
+      console.log('Date object:', localDate);
+      console.log('Local:', localDate.toString());
+      console.log('ISO UTC:', localDate.toISOString());
+
+      finalScheduleTime = localDate.toISOString();
+    } else {
+      finalScheduleTime = new Date().toISOString();
     }
-  };
 
+    // ============================================
+    // FINAL PAYLOAD
+    // ============================================
+
+    const payload = {
+      invoiceId,
+      scheduleTime: finalScheduleTime,
+    };
+
+    // ============================================
+    // ADD EMAIL TYPE SPECIFIC DATA
+    // ============================================
+
+    switch (advancedForm.emailType) {
+      case 'confirmation':
+        payload.paymentDetails = advancedForm.paymentDetails;
+        break;
+
+      case 'cancellation':
+        payload.reason = advancedForm.reason;
+        break;
+
+      case 'revised':
+        payload.changes = advancedForm.changes;
+        break;
+
+      case 'credit_note':
+        payload.creditAmount = advancedForm.creditAmount;
+        payload.reason = advancedForm.reason;
+        break;
+
+      case 'recurring':
+        payload.cycle = advancedForm.cycle;
+        break;
+
+      default:
+        break;
+    }
+
+    // ============================================
+    // DEBUG FINAL PAYLOAD
+    // ============================================
+
+    console.log('\n📦 FINAL ADVANCED EMAIL PAYLOAD:');
+    console.log(payload);
+
+    console.log(
+      '🕐 FINAL UTC scheduleTime:',
+      payload.scheduleTime
+    );
+
+    // ============================================
+    // SEND API
+    // ============================================
+
+    await api.post(
+      `/emails${advancedEndpoints[advancedForm.emailType]}`,
+      payload
+    );
+
+    // ============================================
+    // SUCCESS
+    // ============================================
+
+    const typeLabel = advancedForm.emailType.replace('_', ' ');
+
+    setMessage({
+      type: 'success',
+      text: `✅ ${typeLabel} email scheduled!`,
+    });
+
+    setAdvancedForm({
+      ...advancedForm,
+      scheduleTime: '',
+      paymentDetails: '',
+      reason: '',
+      changes: '',
+      creditAmount: '',
+    });
+
+    if (onEmailSent) {
+      onEmailSent();
+    }
+
+    toast.success(
+      `${typeLabel} email scheduled successfully!`
+    );
+
+  } catch (error) {
+
+    // ============================================
+    // ERROR
+    // ============================================
+
+    console.error('\n❌ ADVANCED EMAIL SCHEDULING ERROR');
+    console.error('Error:', error);
+    console.error('Message:', error.message);
+    console.error('Response:', error.response);
+    console.error('Response data:', error.response?.data);
+    console.error('Response status:', error.response?.status);
+
+    const errorMsg =
+      error.response?.data?.message ||
+      'Failed to schedule';
+
+    setMessage({
+      type: 'error',
+      text: errorMsg,
+    });
+
+    toast.error(errorMsg);
+
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="space-y-3 sm:space-y-4 w-full">
 
