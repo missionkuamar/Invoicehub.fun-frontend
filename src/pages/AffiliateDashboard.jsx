@@ -129,8 +129,8 @@ const AffiliateDashboard = () => {
         throw new Error('Invalid affiliate dashboard response');
       }
 
-     // console.log('API RESPONSE pagination:', data.linkPagination);
-     // console.log('API RESPONSE links:', data.links);
+      // console.log('API RESPONSE pagination:', data.linkPagination);
+      // console.log('API RESPONSE links:', data.links);
 
       setAffiliate(data.affiliate || null);
       setStats(data.stats || null);
@@ -256,7 +256,7 @@ const AffiliateDashboard = () => {
   const handleLinkLimitChange = (limit) => {
     const newLimit = Number(limit);
 
-   // console.log('LIMIT CHANGE:', newLimit);
+    // console.log('LIMIT CHANGE:', newLimit);
 
     const allowedLimits = [5, 10, 20, 50, 100, 200];
 
@@ -415,9 +415,9 @@ const AffiliateDashboard = () => {
 
   const handleCopyLink = async (slug, code) => {
     try {
-      const backendUrl =
-        import.meta.env.VITE_API_URL ||
-        'https://invoicehub-fun-backend.onrender.com';
+      const backendUrl = 'https://invoicehub-fun-backend.onrender.com' || import.meta.env.VITE_API_URL;
+
+
 
       const url = `${backendUrl}/r/${slug}?ref=${code}`;
 
