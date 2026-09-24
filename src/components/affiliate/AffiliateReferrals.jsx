@@ -59,6 +59,7 @@ const AffiliateReferrals = ({
 }) => {
   const { theme } = useTheme();
 
+  
   const isReferral = type === 'referral';
   const isServerPaginated = Boolean(fetchUrl);
 
@@ -67,7 +68,7 @@ const AffiliateReferrals = ({
   // ============================================================
 
   const [items, setItems] = useState(initialItems);
-
+// console.log(items);
   const [pagination, setPagination] = useState(
     DEFAULT_PAGINATION
   );

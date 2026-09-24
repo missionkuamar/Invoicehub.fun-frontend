@@ -4,24 +4,24 @@
 @tailwind utilities;
 
 @layer base {
-
   html {
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-  } 
+    overflow-x: clip;           /* ✅ Dropdown cut nahi karega */
+    min-height: 100%;
+  }
 
-  
   * {
     @apply transition-colors duration-300;
   }
-  
+
   body {
     @apply antialiased;
+    overflow-x: clip;           /* ✅ Dropdown cut nahi karega */
+    min-height: 100vh;
   }
 }
-
-/* frontend/src/index.css — end mein add karo */
 
 /* ============================================================ */
 /* PRINT STYLES — sirf invoice print hoga, baaki nahi */
@@ -51,37 +51,34 @@
     margin: 10mm;
   }
 
-  /* Colors preserve */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
-  /* Hide buttons/actions */
   button,
   .no-print {
     display: none !important;
   }
 }
-@layer components {
 
-  
+@layer components {
   .theme-transition {
     @apply transition-all duration-500 ease-in-out;
   }
-  
+
   .btn-primary {
     @apply px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors;
   }
-  
+
   .btn-secondary {
     @apply px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors;
   }
-  
+
   .input-field {
     @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500;
   }
-  
+
   .card {
     @apply bg-white rounded-lg shadow-md p-6;
   }
@@ -89,18 +86,24 @@
 
 /* Custom Animations */
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-20px);
   }
 }
 
 @keyframes glow {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
@@ -110,12 +113,12 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
 }
 
-/* Utility Classes */
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
@@ -132,7 +135,6 @@
   animation: spin-slow 20s linear infinite;
 }
 
-/* Glassmorphism */
 .glass {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
@@ -147,12 +149,10 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Gradient Text */
 .gradient-text {
   @apply bg-gradient-to-r from-primary-500 to-blue-600 text-transparent bg-clip-text;
 }
 
-/* Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -169,7 +169,6 @@
   @apply bg-primary-600;
 }
 
-/* Selection Color */
 ::selection {
   @apply bg-primary-500 text-white;
 }
@@ -179,6 +178,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

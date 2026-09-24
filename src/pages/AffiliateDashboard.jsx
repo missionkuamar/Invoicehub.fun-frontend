@@ -415,9 +415,9 @@ const AffiliateDashboard = () => {
 
   const handleCopyLink = async (slug, code) => {
     try {
-      //const backendUrl = 'https://invoicehub-fun-backend.onrender.com' || import.meta.env.VITE_API_URL;
- const backendUrl = 'https://invoicehub-fun-backend.onrender.com';
-//const backendUrl = 'http://localhost:5000';
+      //const backendUrl = 'https://invoicehub-fun-backend.onrender.com' || import.meta.env.FRONTENT_URL;
+ const backendUrl = 'https://www.invoicehub.fun';
+//const backendUrl = import.meta.env.FRONTEND_URL || 'http://localhost:3000';
 
       const url = `${backendUrl}/r/${slug}?ref=${code}`;
 

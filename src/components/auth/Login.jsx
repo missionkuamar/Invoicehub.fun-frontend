@@ -1,5 +1,5 @@
 // frontend/src/components/auth/Login.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaArrowLeft } from 'react-icons/fa';
@@ -35,6 +35,16 @@ const Login = () => {
   const handleGoBack = () => {
     navigate(-1);
   };
+
+
+  // ✅ URL se ref capture karo aur localStorage mein save karo
+  // useEffect(() => {
+  //   const ref = new URLSearchParams(window.location.search).get('ref');
+  //   if (ref) {
+  //     localStorage.setItem('affiliateRef', ref);
+  //     console.log('✅ Affiliate ref saved:', ref);
+  //   }
+  // }, []);
 
   // Loading state
   if (loading || isLoggingIn) {
@@ -97,7 +107,7 @@ const Login = () => {
               size="large"
               text="continue_with"
               shape="rectangular"
-              width="100%"
+              width="350"                 // ✅ Fixed number
               useOneTap={false}
               auto_select={false}
             />

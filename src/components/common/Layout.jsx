@@ -74,14 +74,16 @@ const Layout = () => {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen w-full overflow-hidden">
+      {/* ✅ FIXED: Removed `overflow-hidden` from wrapper */}
+      <div className="flex-1 flex flex-col min-h-screen w-full">
         {/* Navbar */}
         <Navbar onToggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
 
         {/* Page Content */}
+        {/* ✅ FIXED: Changed `overflow-y-auto` to `overflow-visible` */}
         <main 
           className={`
-            flex-1 overflow-y-auto p-3 md:p-4 lg:p-6 
+            flex-1 overflow-visible p-3 md:p-4 lg:p-6 
             ${theme.colors.background}
             transition-all duration-300
           `}

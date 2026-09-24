@@ -152,7 +152,7 @@ const InvoiceList = () => {
       {/* ✅ Filters — always mounted, no remount */}
       <InvoiceFilters />
 
-      <div className={`${theme.colors.card} rounded-2xl border ${theme.colors.border} overflow-hidden shadow-sm w-full`}>
+      <div className={`${theme.colors.card} rounded-2xl border ${theme.colors.border} shadow-sm w-full`}>
 
         {/* ================= BULK ACTIONS ================= */}
         {selectedInvoices.length > 0 && (
@@ -268,10 +268,11 @@ const InvoiceList = () => {
           </table>
         </div>
 
+     
         {/* ============================================================ */}
         {/* ✅ MOBILE CARD VIEW (below md) */}
         {/* ============================================================ */}
-        <div className="md:hidden divide-y divide-gray-200 dark:divide-gray-700">
+        <div className="md:hidden divide-y divide-gray-200 dark:divide-gray-700 overflow-y-auto">
           {invoices.map((invoice) => (
             <div key={invoice._id} className={`${theme.colors.hover} transition-colors p-3`}>
               {/* Row 1: Invoice # + Actions Menu */}
@@ -285,8 +286,8 @@ const InvoiceList = () => {
                   </p>
                 </div>
 
-                {/* ✅ Mobile Actions Menu */}
-                <div className="relative flex-shrink-0">
+                {/* ✅ Mobile Actions Menu - FIXED */}
+                <div className="relative flex-shrink-0 z-50">
                   <button
                     onClick={(e) => toggleMenu(e, invoice._id)}
                     className={`p-2 rounded-lg ${theme.colors.hover} transition-colors`}
@@ -296,7 +297,7 @@ const InvoiceList = () => {
 
                   {openMenuId === invoice._id && (
                     <div
-                      className={`absolute right-0 top-full mt-1 w-40 ${theme.colors.card} border ${theme.colors.border} rounded-xl shadow-lg z-20 overflow-hidden`}
+                      className={`absolute right-0 top-full mt-1 w-40 ${theme.colors.card} border ${theme.colors.border} rounded-xl shadow-2xl z-[9999]`}
                       onClick={(e) => e.stopPropagation()}
                     >
                       <button
@@ -318,7 +319,6 @@ const InvoiceList = () => {
                       >
                         <FaEdit className="text-green-500" /> Edit
                       </button>
-                      
                     </div>
                   )}
                 </div>

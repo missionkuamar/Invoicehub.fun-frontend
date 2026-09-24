@@ -50,18 +50,100 @@ import TermsConditions from './components/homepage/contact/TermsConditions';
 import RefundPolicy from './components/homepage/contact/RefundPolicy';
 
 // ✅ Affiliate Redirect Component
+// ✅ Affiliate Redirect Component
 const AffiliateRedirect = () => {
   const { slug } = useParams();
+  const location = useLocation();
 
   useEffect(() => {
-    //window.location.href = `http://localhost:5000/r/${slug}${window.location.search}`;
-    window.location.href = `https://invoicehub-fun-backend.onrender.com/r/${slug}${window.location.search}`;
-  }, [slug]);
+    // ============================================================
+    // 🔍 DEBUG: Component Mount Info
+    // ============================================================
+    // console.group('🔗 AffiliateRedirect Component Mounted');
+    // console.log('📍 Current URL:', window.location.href);
+    // console.log('📍 Pathname:', window.location.pathname);
+    // console.log('📍 Search:', window.location.search);
+    // console.log('📍 Hash:', window.location.hash);
+    // console.log('📍 Slug (from useParams):', slug);
+    // console.log('📍 Location object:', location);
+    // console.log('📍 Backend URL from env:', import.meta.env.VITE_BACKEND_URL);
+    // console.groupEnd();
+
+    // ============================================================
+    // 🔍 DEBUG: Parse ref from URL
+    // ============================================================
+    const params = new URLSearchParams(location.search);
+    const ref = params.get('ref');
+
+    // console.group('🎯 Ref Parsing');
+    // console.log('📦 Raw search string:', location.search);
+    // console.log('📦 URLSearchParams entries:', [...params.entries()]);
+    // console.log('📦 Extracted ref:', ref);
+    // console.log('📦 ref type:', typeof ref);
+    // console.log('📦 ref is truthy?', !!ref);
+    // console.groupEnd();
+
+    // ============================================================
+    // ✅ STEP 1: Save ref to localStorage
+    // ============================================================
+    if (ref) {
+      console.group('💾 Saving to localStorage');
+      // console.log('💾 Before save:', localStorage.getItem('affiliateRef'));
+      
+      try {
+        localStorage.setItem('affiliateRef', ref);
+        // console.log('✅ Saved successfully:', localStorage.getItem('affiliateRef'));
+      } catch (err) {
+        console.error('❌ localStorage save failed:', err);
+      }
+      
+      // console.log('💾 All localStorage keys:', Object.keys(localStorage));
+      // console.groupEnd();
+    } else {
+      console.warn('⚠️ No ref found in URL! Cannot save to localStorage.');
+      console.warn('⚠️ URL should be like: /r/SLUG?ref=CODE');
+      console.warn('⚠️ Current search:', location.search);
+    }
+
+    // ============================================================
+    // ✅ STEP 2: Build redirect URL
+    // ============================================================
+    const backendUrl = 'https://invoicehub-fun-backend.onrender.com'
+   // const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+    const redirectUrl = `${backendUrl}/r/${slug}${location.search}`;
+
+    // console.group('🔄 Redirect Info');
+    // console.log('🔄 Backend URL (from env):', import.meta.env.VITE_BACKEND_URL);
+    // console.log('🔄 Fallback used?', !import.meta.env.VITE_BACKEND_URL);
+    // console.log('🔄 Final backendUrl:', backendUrl);
+    // console.log('🔄 Redirect URL:', redirectUrl);
+    // console.groupEnd();
+
+    // ============================================================
+    // ✅ STEP 3: Redirect (with small delay for logs to appear)
+    // ============================================================
+    // console.log('🚀 Redirecting in 1 second... (so you can read logs)');
+    
+    const timer = setTimeout(() => {
+      // console.log('🚀 NOW redirecting to:', redirectUrl);
+      window.location.href = redirectUrl;
+    }, 1000);  // 1 second delay
+
+    // Cleanup
+    return () => {
+      // console.log('🧹 AffiliateRedirect unmounting, clearing timer');
+      clearTimeout(timer);
+    };
+  }, [slug, location.search]);
+
   return (
     <div className="flex justify-center items-center h-64">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
         <p className="text-gray-600">Redirecting...</p>
+        <p className="text-xs text-gray-400 mt-2">
+          Check console for debug logs...
+        </p>
       </div>
     </div>
   );
@@ -83,6 +165,21 @@ function App() {
   const dispatch = useDispatch();
   const { token, loading, isAuthenticated } = useSelector((state) => state.auth);
   const [authChecked, setAuthChecked] = useState(false);
+
+
+  // ✅ Capture ref from ANY URL on app load
+  // useEffect(() => {
+  //   const params = new URLSearchParams(window.location.search);
+  //   const ref = params.get('ref');
+  //   if (ref) {
+  //     localStorage.setItem('affiliateRef', ref);
+  //     console.log('✅ Global ref captured:', ref);
+  //   }
+  // }, []);
+
+
+
+
 
   // ✅ Check auth on app mount - runs only once
   useEffect(() => {
@@ -122,20 +219,20 @@ function App() {
         path="/landing"
         element={isAuth ? <Navigate to="/dashboard" replace /> : <Home />}
       />
-<Route
-  path="/privacy-policy"
-  element={<PrivacyPolicy />}
-/>
+      <Route
+        path="/privacy-policy"
+        element={<PrivacyPolicy />}
+      />
 
-<Route
-  path="/terms"
-  element={<TermsConditions />}
-/>
+      <Route
+        path="/terms"
+        element={<TermsConditions />}
+      />
 
-<Route
-  path="/refund-policy"
-  element={<RefundPolicy />}
-/>
+      <Route
+        path="/refund-policy"
+        element={<RefundPolicy />}
+      />
       {/* Auth Routes */}
       <Route
         path="/login"
@@ -161,7 +258,7 @@ function App() {
       >
         {/* Dashboard */}
         <Route path="/dashboard" element={<Dashboard />} />
-<Route path='/personaldata' element={<PersonalData />} />
+        <Route path='/personaldata' element={<PersonalData />} />
         {/* Invoices */}
         <Route path="/invoices" element={<Invoices />} />
 
